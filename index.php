@@ -28,14 +28,19 @@ OCP\JSON::checkLoggedIn();
 OCP\JSON::checkAppEnabled('files_thumbnail');
 session_write_close();
 
-$filepath = $_GET['path'];
-$filesize = empty($_GET['size'])?'':$_GET['size'];
-$filewidth = empty($_GET['width'])?'':$_GET['width'];
-$fileheight = empty($_GET['height'])?'':$_GET['height'];
+if(!empty($_GET['path'])) {
+	$filepath = $_GET['path'];
+	$filesize = empty($_GET['size'])?'':$_GET['size'];
+	$filewidth = empty($_GET['width'])?'':$_GET['width'];
+	$fileheight = empty($_GET['height'])?'':$_GET['height'];
 
-$thumbnail = Thumbnail::getThumbnail($filepath, $filesize, $filewidth, $fileheight);
+	$thumbnail = Thumbnail::getThumbnail($filepath, $filesize, $filewidth, $fileheight);
+}
 
-if ($thumbnail) {
+if (!empty($thumbnail)) {
 	OCP\Response::enableCaching(3600 * 24); // 24 hour
 	$thumbnail->show();
+} else {
+	\OC_Response::setStatus(404);
+	exit();
 }
