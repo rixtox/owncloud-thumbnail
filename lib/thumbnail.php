@@ -13,7 +13,8 @@ namespace OC\Thumbnail;
 class ThumbnailManager {
 
 	// Define the default sizes for thumbnails
-	// Value from Drobox API https://www.dropbox.com/developers/reference/api#thumbnails
+	// Value from Drobox API:
+	//   https://www.dropbox.com/developers/reference/api#thumbnails
 	// Please rewrite it to satisfy your needs.
 	public static $sizes = array(
 		'xs'  =>array('width'=>32,   'height'=>32),
@@ -22,22 +23,50 @@ class ThumbnailManager {
 		'l'   =>array('width'=>640,  'height'=>480),
 		'xl'  =>array('width'=>1024, 'height'=>768));
 
-	public static function getThumbnail($path, $size = 'm', $width = null, $height = null) {
+	public static function getThumbnail($path, $size = 'm',
+					    $width = null, $height = null)
+	{
+		$pathinfo = pathinfo($path);
+		$ext_name = isset($pathinfo['extension']) ?
+		  $pathinfo['extension'] : '';
+		switch (strtolower($ext_name)) {
+		case 'jpg': case 'jpeg': case 'png': case 'gif':
+			return getThumbnailFromImage($path, $size,
+						     $width, $height);
+		case 'pdf':
+			return getThumbnailFromPDF($path, $size,
+						     $width, $height);
+		default:
+			return getEmptyThumbnail();
+		}
+	}
 
-		if(!empty($width) && !empty($height)) {
-			$output_size = array('width'=>$width, 'height'=>$height);
+	public static function getThumbnailFromImage($path,
+						     $size = 'm',
+						     $width = null,
+						     $height = null)
+	{
+		if (!empty($width) && !empty($height)) {
+			$output_size = array('width'=>$width,
+					     'height'=>$height);
 		} else {
 			$size = empty(self::$sizes[$size])?'m':$size;
 			$output_size = self::$sizes[$size];
 		}
 
 		$pathinfo = pathinfo($path);
-		$extension = isset($pathinfo['extension'])?$pathinfo['extension']:'';
-		$thumbnail_path = "{$pathinfo['dirname']}/{$pathinfo['filename']}_{$output_size['width']}x{$output_size['height']}.{$extension}";
+		$extension = isset($pathinfo['extension']) ?
+		  $pathinfo['extension'] : '';
+		$thumbnail_path = "{$pathinfo['dirname']}/" .
+		  "{$pathinfo['filename']}" .
+		  "_{$output_size['width']}x{$output_size['height']}" .
+		  ".{$extension}";
+
 
 		$thumbnail_storage = \OCP\Files::getStorage('files_thumbnail');
 		if ($thumbnail_storage->file_exists($thumbnail_path)) {
-			return new \OC_Image($thumbnail_storage->getLocalFile($thumbnail_path));
+			return new \OC_Image($thumbnail_storage-> \
+					     getLocalFile($thumbnail_path));
 		}
 
 		$image = new \OC_Image();
@@ -46,10 +75,12 @@ class ThumbnailManager {
 
 		$image->fixOrientation();
 
-		$ret = $image->preciseResize( $output_size['width'], $output_size['height'] );
+		$ret = $image->preciseResize($output_size['width'],
+					     $output_size['height']);
 
 		if (!$ret) {
-			\OC_Log::write(self::TAG, 'Couldn\'t resize image', \OC_Log::ERROR);
+			\OC_Log::write(self::TAG, 'Couldn\'t resize image',
+				       \OC_Log::ERROR);
 			unset($image);
 			return false;
 		}
@@ -59,17 +90,31 @@ class ThumbnailManager {
 		return $image;
 	}
 
+	public static function getThumbnailFromPDF($path,
+						   $size = 'm',
+						   $width = null,
+						   $height = null)
+	{
+	  	// TODO: Generate PDF Thumbnail here.
+		return getEmptyThumbnail();
+	}
+
 	public static function removeThumbnails($path) {
 		$thumbnail_storage = \OCP\Files::getStorage('files_thumbnail');
 		$pathinfo = pathinfo($path);
 		$dirname = $pathinfo['dirname'];
-		$extension = isset($pathinfo['extension'])?$pathinfo['extension']:'';
+		$extension = isset($pathinfo['extension']) ?
+		  $pathinfo['extension'] : '';
 
 		$handle = $thumbnail_storage->opendir($dirname);
 
-		while($filename = readdir($handle)) { // due to the native code bug, OC_FilesystemView->readdir() can not be used.
-			if(preg_match("/^{$pathinfo['filename']}_\d*x\d*\.{$extension}$/", $filename)) {
-				$thumbnail_storage->unlink($dirname.'/'.$filename);
+		// due to the native code bug,
+		//+OC_FilesystemView->readdir() can not be used.
+		while($filename = readdir($handle)) {
+			if(preg_match("/^{$pathinfo['filename']}_" .
+				      "\d*x\d*\.{$extension}$/", $filename)) {
+				$thumbnail_storage->unlink($dirname .
+							   '/'.$filename);
 			}
 
 		}
@@ -79,18 +124,39 @@ class ThumbnailManager {
 		$thumbnail_storage = \OCP\Files::getStorage('files_thumbnail');
 		$oldpathinfo = pathinfo($oldpath);
 		$olddirname = $oldpathinfo['dirname'];
-		$oldextension = isset($oldpathinfo['extension'])?$oldpathinfo['extension']:'';
+		$oldextension = isset($oldpathinfo['extension']) ?
+		  $oldpathinfo['extension'] : '';
 		$newpathinfo = pathinfo($newpath);
 		$newdirname = $newpathinfo['dirname'];
-		$newextension = isset($newpathinfo['extension'])?$newpathinfo['extension']:'';
+		$newextension = isset($newpathinfo['extension']) ?
+		  $newpathinfo['extension'] : '';
 
 		$handle = $thumbnail_storage->opendir($olddirname);
 
-		while($filename = readdir($handle)) { // due to the native code bug, OC_FilesystemView->readdir() can not be used.
-			if(preg_match("/^{$oldpathinfo['filename']}(_\d*x\d*\.){$oldextension}$/", $filename, $matches)) {
-				$thumbnail_storage->rename("{$olddirname}/{$oldpathinfo['filename']}{$matches[1]}{$oldextension}", "{$newdirname}/{$newpathinfo['filename']}{$matches[1]}{$newextension}");
+		// due to the native code bug,
+		//+OC_FilesystemView->readdir() can not be used.
+		while ($filename = readdir($handle)) {
+			if(preg_match("/^{$oldpathinfo['filename']}" .
+				      "(_\d*x\d*\.){$oldextension}$/",
+				      $filename, $matches)) {
+				$oldname = "{$olddirname}/" .
+				  "{$oldpathinfo['filename']}" .
+				  "{$matches[1]}{$oldextension}";
+				$newname = "{$newdirname}/" .
+				  "{$newpathinfo['filename']}" .
+				  "{$matches[1]}{$newextension}";
+
+				$thumbnail_storage->rename($oldname,
+							   $newname);
 			}
 
 		}
 	}
+
+
+	private static function getEmptyThumbnail()
+	{
+		return new \OC_Image();
+	}
+
 }
