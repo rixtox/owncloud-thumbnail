@@ -3,7 +3,7 @@
 	<id>files_thumbnail</id>
 	<name>Thumbnail Generator</name>
 	<description>Generate thumbnails for different types of files.</description>
-	<licence>AGPL</licence>
+	<licence>WTFPL</licence>
 	<author>RixTox</author>
 	<require>4.9</require>
 	<shipped>true</shipped>

@@ -23,6 +23,9 @@
 */
 
 use OC\Thumbnail\ThumbnailManager as Thumbnail;
+use OC\Thumbnail\ThumbnailGeneratorRegistry as Generator;
+
+Generator::register_generator('/^image\/.*/', '\OC\Thumbnail\Generator\Image');
 
 OCP\JSON::checkLoggedIn();
 OCP\JSON::checkAppEnabled('files_thumbnail');

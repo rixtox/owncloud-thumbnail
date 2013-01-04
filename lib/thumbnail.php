@@ -9,6 +9,7 @@
  *
  */
 namespace OC\Thumbnail;
+use OC\Thumbnail\ThumbnailGeneratorRegistry as Generator;
 
 class ThumbnailManager {
 
@@ -29,34 +30,28 @@ class ThumbnailManager {
 		} else {
 			$size = empty(self::$sizes[$size])?'m':$size;
 			$output_size = self::$sizes[$size];
-		}
+		}		
 
 		$pathinfo = pathinfo($path);
 		$extension = isset($pathinfo['extension'])?$pathinfo['extension']:'';
 		$thumbnail_path = "{$pathinfo['dirname']}/{$pathinfo['filename']}_{$output_size['width']}x{$output_size['height']}.{$extension}";
 
 		$thumbnail_storage = \OCP\Files::getStorage('files_thumbnail');
+
 		if ($thumbnail_storage->file_exists($thumbnail_path)) {
 			return new \OC_Image($thumbnail_storage->getLocalFile($thumbnail_path));
 		}
 
-		$image = new \OC_Image();
-		$image->loadFromFile(\OC_Filesystem::getLocalFile($path));
-		if (!$image->valid()) return false;
+		$fileMimeType = \OC_Filesystem::getMimeType($path);
 
-		$image->fixOrientation();
+		$thumbnailGenerator = Generator::get_generator($fileMimeType);
 
-		$ret = $image->preciseResize( $output_size['width'], $output_size['height'] );
-
-		if (!$ret) {
-			\OC_Log::write(self::TAG, 'Couldn\'t resize image', \OC_Log::ERROR);
-			unset($image);
-			return false;
-		}
+		$thumbnailImage = $thumbnailGenerator->generateThumbnail($path, $output_size['width'], $output_size['height']);
+		
 		$l = $thumbnail_storage->getLocalFile($thumbnail_path);
 
-		$image->save($l);
-		return $image;
+		$thumbnailImage->save($l);
+		return $thumbnailImage;
 	}
 
 	public static function removeThumbnails($path) {
