@@ -13,6 +13,6 @@ namespace OC\Thumbnail;
 
 interface ThumbnailGeneratorTemplate {
 	// return OC_Image
-	public function generateThumbnail($filepath, $thumbnailWidth, $thumbnailHeight);
-
+	public function generateThumbnail($path, $scale);
+	public function scaleFilter($path, $scale);
 }

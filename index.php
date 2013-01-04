@@ -40,10 +40,10 @@ if(!empty($_GET['path'])) {
 	$thumbnail = Thumbnail::getThumbnail($filepath, $filesize, $filewidth, $fileheight);
 }
 
-if (!empty($thumbnail)) {
+if(gettype($thumbnail) == 'array') {
+	header('Content-Type: application/json');
+	echo json_encode($thumbnail);
+} elseif(get_class($thumbnail) == 'OC_Image') {
 	OCP\Response::enableCaching(3600 * 24); // 24 hour
 	$thumbnail->show();
-} else {
-	\OC_Response::setStatus(404);
-	exit();
 }
