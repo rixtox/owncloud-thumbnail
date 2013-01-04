@@ -15,9 +15,6 @@ use \OC\Thumbnail\ThumbnailGeneratorTemplate as Template;
 
 class Image implements Template {
 
-	const MAXWIDTH = 1024;
-	const MAXHEIGHT = 1024;
-
 	public function generateThumbnail($path, $scale) {
 		$image = new \OC_Image();
 		$image->loadFromFile(\OC_Filesystem::getLocalFile($path));
@@ -40,10 +37,21 @@ class Image implements Template {
 	public function scaleFilter($path, $scale) {
 		$image = new \OC_Image();
 		$image->loadFromFile(\OC_Filesystem::getLocalFile($path));
-		$width = ($scale['width'] > $image->width())?$image->width():$scale['width'];
-		$height = ($scale['height'] > $image->height())?$image->height():$scale['height'];
-		$width = ($width > self::MAXWIDTH)?self::MAXWIDTH:$width;
-		$height = ($height > self::MAXHEIGHT)?self::MAXHEIGHT:$height;
-		return array('width'=>$width, 'height'=>$height);
+
+		$old_w = $image->width();
+		$old_h = $image->height();
+		$max_w = $scale['width'];
+		$max_h = $scale['height'];
+
+		if ($max_w / $max_h < $old_w / $old_h) {
+			$new_w = $max_w;
+			$new_h = ($old_h / $old_w) * $new_w;
+		} else {
+			$new_h = $max_h;
+			$new_w = ($old_w / $old_h) * $new_h;
+		}
+
+		return array('width'  => floor($new_w),
+					 'height' => floor($new_h));
 	}
 }

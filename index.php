@@ -12,38 +12,33 @@
 /*
  *  Public app for generating thumbnails.
  *  Usage:
- *  	Get thumbnail in default sizes:
  *  	http://domain/owncloud/?app=files_thumbnail&
  *      path=/subdir/imagefile.jpg&size={xs, s, m, l, xl}
  *  
- *  	Specify size for thumbnail:
- *  	http://domain/owncloud/?app=files_thumbnail&
- *      path=/subdir/imagefile.jpg&width=125&height=125
- *  
 */
 
-use OC\Thumbnail\ThumbnailManager as Thumbnail;
+use OC\Thumbnail;
+use OC\Thumbnail\Exceptions;
 use OC\Thumbnail\ThumbnailGeneratorRegistry as Generator;
 
-Generator::register_generator('/^image\/.*/', '\OC\Thumbnail\Generator\Image');
+Generator::register_generator('/^image\/.*/',
+	'\OC\Thumbnail\Generator\Image');
 
 OCP\JSON::checkLoggedIn();
 OCP\JSON::checkAppEnabled('files_thumbnail');
 session_write_close();
 
-if(!empty($_GET['path'])) {
-	$filepath = $_GET['path'];
-	$filesize = empty($_GET['size'])?'':$_GET['size'];
-	$filewidth = empty($_GET['width'])?'':$_GET['width'];
-	$fileheight = empty($_GET['height'])?'':$_GET['height'];
+$filepath =  empty($_GET['path']) ? '' : $_GET['path'];
+$filesize = empty($_GET['size']) ? '' : $_GET['size'];
 
-	$thumbnail = Thumbnail::getThumbnail($filepath, $filesize, $filewidth, $fileheight);
-}
+try {
+	$thumbnail = Thumbnail\ThumbnailManager::getThumbnail($filepath,
+												$filesize);
 
-if(gettype($thumbnail) == 'array') {
-	header('Content-Type: application/json');
-	echo json_encode($thumbnail);
-} elseif(get_class($thumbnail) == 'OC_Image') {
-	OCP\Response::enableCaching(3600 * 24); // 24 hour
+	// Cache for 24 hour
+	OCP\Response::enableCaching(3600 * 24);
 	$thumbnail->show();
+} catch (Exceptions\ThumbnailError $e) {
+	header('Content-Type: application/json');
+	echo json_encode(array('error_message' => $e->getMessage()));
 }

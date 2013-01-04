@@ -9,8 +9,10 @@
  *
  */
 
-
 OC::$CLASSPATH['OC_Files_Thumbnail_Hooks_Handlers'] = "apps/files_thumbnail/lib/hooks_handlers.php";
+OC::$CLASSPATH['OC\Thumbnail\Excptions\ThumbnailError'] = "apps/files_thumbnail/lib/thumbnail_exceptions.php";
+OC::$CLASSPATH['OC\Thumbnail\Excptions\InvalidPathError'] = "apps/files_thumbnail/lib/thumbnail_exceptions.php";
+OC::$CLASSPATH['OC\Thumbnail\Excptions\GeneratorNotFoundError'] = "apps/files_thumbnail/lib/thumbnail_exceptions.php";
 OC::$CLASSPATH['OC\Thumbnail\ThumbnailManager'] = "apps/files_thumbnail/lib/thumbnail.php";
 OC::$CLASSPATH['OC\Thumbnail\ThumbnailGeneratorRegistry'] = "apps/files_thumbnail/lib/thumbnail_generator_registry.php";
 OC::$CLASSPATH['OC\Thumbnail\ThumbnailGeneratorTemplate'] = "apps/files_thumbnail/lib/thumbnail_generator_template.php";

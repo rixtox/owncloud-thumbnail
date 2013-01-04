@@ -39,16 +39,16 @@ class ThumbnailManager {
 	}
 
 	public static function getThumbnail($path, $size = 'm') {
+		// BUG: empty str as $path here will cause a unexpected
+		//      returning value.
 		$fileMimeType = \OC_Filesystem::getMimeType($path);
-
 		$thumbnailGenerator = Generator::get_generator($fileMimeType);
 
 		if(!\OC_Filesystem::file_exists($path)) {
-			return self::generateError('failed', 'Invalid file path.', \OC_Log::ERROR);
+			throw new Exceptions\InvalidPathError($path);
 		}
-
 		if(!$thumbnailGenerator) {
-			return self::generateError('failed', "No thumbnail generator for MIME file type {$fileMimeType}.", \OC_Log::ERROR);
+			throw new Exceptions\GeneratorNotFoundError($fileMimeType);
 		}
 
 		$size = empty(self::$sizes[$size])?'m':$size;
@@ -68,11 +68,6 @@ class ThumbnailManager {
 
 		$thumbnailImage->save($l);
 		return $thumbnailImage;
-	}
-
-	public static function generateError($status, $message, $level) {
-		\OC_Log::write(self::TAG, $message, $level);
-		return array('status'=>$status, 'error'=>$message);
 	}
 
 	public static function removeThumbnails($path) {
