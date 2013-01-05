@@ -8,6 +8,7 @@
  * 	http://wtfpl2.com/
  *
  */
+
 namespace OC\Thumbnail\Exceptions;
 
 class ThumbnailError extends \RuntimeException {

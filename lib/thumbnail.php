@@ -9,6 +9,8 @@
  *
  */
 namespace OC\Thumbnail;
+
+use \OC\Thumbnail;
 use \OC\Thumbnail\ThumbnailGeneratorRegistry as Generator;
 
 class ThumbnailManager {
@@ -17,11 +19,11 @@ class ThumbnailManager {
 	// Value from Drobox API https://www.dropbox.com/developers/reference/api#thumbnails
 	// Please rewrite it to satisfy your needs.
 	private static $sizes = array(
-		'xs'  =>array('width'=>32,   'height'=>32),
-		's'   =>array('width'=>64,   'height'=>64),
-		'm'   =>array('width'=>128,  'height'=>128),
-		'l'   =>array('width'=>640,  'height'=>480),
-		'xl'  =>array('width'=>1024, 'height'=>768));
+		'xs'  => array('width' => 32,   'height' => 32),
+		's'   => array('width' => 64,   'height' => 64),
+		'm'   => array('width' => 128,  'height' => 128),
+		'l'   => array('width' => 640,  'height' => 480),
+		'xl'  => array('width' => 1024, 'height' => 768));
 
 	const TAG = 'ThumbnailManager';
 
