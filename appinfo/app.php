@@ -18,5 +18,6 @@ OC::$CLASSPATH['OC\Thumbnail\ThumbnailGeneratorRegistry'] = "apps/files_thumbnai
 OC::$CLASSPATH['OC\Thumbnail\ThumbnailGeneratorTemplate'] = "apps/files_thumbnail/lib/thumbnail_generator_template.php";
 OC::$CLASSPATH['OC\Thumbnail\Generator\Image'] = "apps/files_thumbnail/lib/thumbnail_generator/image.php";
 
-OCP\Util::connectHook('OC_Filesystem', 'delete', "OC_Files_Thumbnail_Hooks_Handlers", "removeThumbnails");
-OCP\Util::connectHook('OC_Filesystem', 'rename', "OC_Files_Thumbnail_Hooks_Handlers", "renameThumbnails");
+OCP\Util::connectHook('OC_Filesystem', 'delete', "OC_Files_Thumbnail_Hooks_Handlers", "unlinkThumbnail");
+OCP\Util::connectHook('OC_Filesystem', 'rename', "OC_Files_Thumbnail_Hooks_Handlers", "renameThumbnail");
+OCP\Util::connectHook('OC_Filesystem', 'signal_write', "OC_Files_Thumbnail_Hooks_Handlers", "updateThumbnail");

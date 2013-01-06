@@ -72,7 +72,7 @@ class ThumbnailManager {
 		return $thumbnailImage;
 	}
 
-	public static function removeThumbnails($path) {
+	public static function unlinkThumbnail($path) {
 		$thumbnailStorage = \OCP\Files::getStorage('files_thumbnail');
 		$pathinfo = pathinfo($path);
 		$dirname = $pathinfo['dirname'];
@@ -88,7 +88,7 @@ class ThumbnailManager {
 		}
 	}
 
-	public static function renameThumbnails($oldpath, $newpath) {
+	public static function renameThumbnail($oldpath, $newpath) {
 		$thumbnailStorage = \OCP\Files::getStorage('files_thumbnail');
 		$oldpathinfo = pathinfo($oldpath);
 		$olddirname = $oldpathinfo['dirname'];
@@ -105,5 +105,9 @@ class ThumbnailManager {
 			}
 
 		}
+	}
+
+	public static function updateThumbnail($path) {
+		self::unlinkThumbnail($path);
 	}
 }

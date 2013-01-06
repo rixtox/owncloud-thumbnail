@@ -9,14 +9,19 @@
  *
  */
 
+use \OC\Thumbnail;
 
 class OC_Files_Thumbnail_Hooks_Handlers {
 
-	public static function removeThumbnails($params) {
-		\OC\Thumbnail\ThumbnailManager::removeThumbnails($params['path']);
+	public static function unlinkThumbnail($params) {
+		ThumbnailManager::unlinkThumbnail($params['path']);
 	}
 
-	public static function renameThumbnails($params) {
-		\OC\Thumbnail\ThumbnailManager::renameThumbnails($params['oldpath'], $params['newpath']);
+	public static function renameThumbnail($params) {
+		ThumbnailManager::renameThumbnail($params['oldpath'], $params['newpath']);
+	}
+
+	public static function updateThumbnail($params) {
+		ThumbnailManager::updateThumbnail($params);
 	}
 }
